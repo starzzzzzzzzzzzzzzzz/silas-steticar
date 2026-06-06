@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Silas Steticar — Agendamento</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #c0392b;
+    --red-dark: #96281b;
+    --red-light: #e74c3c;
+    --black: #0a0a0a;
+    --gray-900: #111111;
+    --gray-800: #1a1a1a;
+    --gray-700: #242424;
+    --gray-600: #333333;
+    --gray-400: #666666;
+    --gray-200: #aaaaaa;
+    --white: #ffffff;
+    --border: rgba(255,255,255,0.07);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'Barlow', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  header {
+    background: var(--gray-900);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 68px;
+  }
+
+  .logo-area { display: flex; align-items: center; gap: 14px; }
+
+  .logo-img {
+    height: 44px;
+    width: auto;
+    display: block;
+  }
+
+  .admin-link {
+    font-family: 'Barlow Condensed', sans-serif; font-size: 12px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--gray-400); text-decoration: none;
+    padding: 8px 16px; border: 1px solid var(--border); border-radius: 4px; transition: all 0.2s;
+  }
+  .admin-link:hover { color: var(--white); border-color: var(--gray-400); }
+
+  .hero {
+    background-image: url('hero-bg.jpg');
+    background-size: contain;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-color: #000;
+    border-bottom: 1px solid var(--border);
+    /* proporcional à imagem 1750x1240 ≈ 70.8% da largura */
+    min-height: clamp(300px, 71vw, 680px);
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.42);
+    pointer-events: none;
+  }
+  .hero > * { position: relative; z-index: 1; }
+  .hero-inner { padding: 24px; width: 100%; }
+  .hero-tag {
+    display: inline-block; font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px; letter-spacing: 4px; text-transform: uppercase;
+    color: var(--red); border: 1px solid rgba(192,57,43,0.5);
+    background: rgba(0,0,0,0.3);
+    padding: 5px 14px; border-radius: 2px; margin-bottom: 20px;
+  }
+  .hero h1 { font-family: 'Bebas Neue', cursive; font-size: clamp(40px, 8vw, 72px); letter-spacing: 4px; line-height: 0.95; margin-bottom: 16px; }
+  .hero h1 span { color: var(--red); }
+  .hero p { color: #ffffff; font-size: 16px; font-weight: 300; max-width: 500px; margin: 0 auto; line-height: 1.6; text-shadow: 0 1px 4px rgba(0,0,0,0.8); }
+
+  main { max-width: 780px; margin: 0 auto; padding: 48px 24px 80px; }
+
+  .section-title {
+    font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 4px;
+    text-transform: uppercase; color: var(--red); margin-bottom: 20px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .form-card { background: var(--gray-800); border: 1px solid var(--border); border-radius: 12px; padding: 32px; margin-bottom: 24px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .form-group { display: flex; flex-direction: column; gap: 8px; }
+  .form-group.full { grid-column: 1 / -1; }
+
+  label { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--gray-400); }
+
+  input, select, textarea {
+    background: var(--gray-700); border: 1px solid var(--border); border-radius: 8px;
+    color: var(--white); font-family: 'Barlow', sans-serif; font-size: 15px;
+    padding: 12px 16px; outline: none; transition: border-color 0.2s; width: 100%;
+    appearance: none; -webkit-appearance: none;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--red); }
+  input::placeholder, textarea::placeholder { color: var(--gray-600); }
+  select option { background: var(--gray-700); color: var(--white); }
+
+  .attendance-options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .attendance-option {
+    background: var(--gray-700); border: 1px solid var(--border); border-radius: 8px;
+    padding: 16px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 12px;
+  }
+  .attendance-option:hover { border-color: var(--gray-400); }
+  .attendance-option.active { border-color: var(--red); background: rgba(192,57,43,0.08); }
+  .attendance-option input[type="radio"] { display: none; }
+  .att-icon { font-size: 22px; flex-shrink: 0; }
+  .att-label { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--white); }
+  .att-sub { font-size: 11px; color: var(--gray-400); margin-top: 2px; }
+
+  .coleta-fields { display: none; margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--border); }
+  .coleta-fields.visible { display: block; }
+
+  .price-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(192,57,43,0.1); border: 1px solid rgba(192,57,43,0.2);
+    border-radius: 4px; padding: 4px 10px;
+    font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600;
+    color: var(--red-light); margin-top: 6px;
+  }
+  .orcamento-note { font-size: 12px; color: var(--gray-400); font-style: italic; margin-top: 6px; }
+
+  .slots-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; margin-top: 8px; }
+  .slot-btn {
+    background: var(--gray-700); border: 1px solid var(--border); border-radius: 6px;
+    color: var(--white); font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 600;
+    padding: 10px 6px; cursor: pointer; text-align: center; transition: all 0.2s;
+  }
+  .slot-btn:hover:not(.occupied) { border-color: var(--red); color: var(--red-light); }
+  .slot-btn.selected { background: var(--red); border-color: var(--red); color: white; }
+  .slot-btn.occupied { opacity: 0.3; cursor: not-allowed; text-decoration: line-through; }
+
+  .btn-submit {
+    width: 100%; background: var(--red); border: none; border-radius: 8px; color: white;
+    font-family: 'Bebas Neue', cursive; font-size: 20px; letter-spacing: 3px;
+    padding: 18px; cursor: pointer; transition: all 0.2s; margin-top: 24px;
+  }
+  .btn-submit:hover { background: var(--red-light); transform: translateY(-1px); }
+  .btn-submit:active { transform: translateY(0); }
+  .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .success-screen { display: none; text-align: center; padding: 60px 24px; }
+  .success-screen.visible { display: block; }
+  .success-icon {
+    width: 80px; height: 80px; background: rgba(192,57,43,0.15); border: 2px solid var(--red);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 24px; font-size: 36px;
+  }
+  .success-screen h2 { font-family: 'Bebas Neue', cursive; font-size: 42px; letter-spacing: 3px; margin-bottom: 12px; }
+  .success-screen p { color: var(--gray-200); font-size: 16px; margin-bottom: 8px; }
+
+  .booking-summary {
+    background: var(--gray-800); border: 1px solid var(--border); border-radius: 12px;
+    padding: 24px; margin: 32px auto; max-width: 480px; text-align: left;
+  }
+  .summary-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .summary-row:last-child { border-bottom: none; }
+  .summary-label { color: var(--gray-400); }
+  .summary-value { font-weight: 600; color: var(--white); }
+  .summary-value.red { color: var(--red-light); }
+
+  .btn-new {
+    background: transparent; border: 1px solid var(--red); border-radius: 8px;
+    color: var(--red-light); font-family: 'Barlow Condensed', sans-serif; font-size: 14px;
+    letter-spacing: 2px; text-transform: uppercase; padding: 14px 32px;
+    cursor: pointer; transition: all 0.2s; margin-top: 8px;
+  }
+  .btn-new:hover { background: rgba(192,57,43,0.1); }
+
+  .services-preview { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-bottom: 40px; }
+  .service-card { background: var(--gray-800); border: 1px solid var(--border); border-radius: 10px; padding: 16px; transition: border-color 0.2s; }
+  .service-card:hover { border-color: var(--gray-600); }
+  .service-name { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--white); margin-bottom: 6px; }
+  .service-price { font-size: 18px; font-weight: 700; color: var(--red-light); }
+  .service-duration { font-size: 12px; color: var(--gray-400); margin-top: 4px; }
+
+  footer { border-top: 1px solid var(--border); padding: 24px; text-align: center; color: var(--gray-400); font-size: 13px; font-family: 'Barlow Condensed', sans-serif; letter-spacing: 2px; text-transform: uppercase; }
+
+  /* Loading overlay */
+  .loading-overlay {
+    position: fixed; inset: 0; background: rgba(10,10,10,0.85);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 999; flex-direction: column; gap: 16px;
+  }
+  .loading-overlay.hidden { display: none; }
+  .spinner {
+    width: 40px; height: 40px; border: 3px solid var(--border);
+    border-top-color: var(--red); border-radius: 50%; animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-family: 'Barlow Condensed', sans-serif; letter-spacing: 3px; text-transform: uppercase; font-size: 12px; color: var(--gray-400); }
+
+  @media (max-width: 600px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .attendance-options { grid-template-columns: 1fr; }
+    .form-card { padding: 20px; }
+    .hero { min-height: clamp(200px, 71vw, 680px); }
+  }
+</style>
+</head>
+<body>
+
+<!-- Loading overlay -->
+<div class="loading-overlay hidden" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loadingText">Salvando agendamento...</div>
+</div>
+
+<header>
+  <div class="header-inner">
+    <div class="logo-area">
+      <img src="logo-silas.png" alt="Silas Steticar" class="logo-img">
+    </div>
+    <a href="admin.html" class="admin-link">Área Admin</a>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-tag">Agende online • Rápido e fácil</div>
+    <h1>Agende seu<br><span>serviço</span></h1>
+    <p>Escolha o serviço, o dia e o horário. Confirmação imediata, sem complicação.</p>
+  </div>
+</div>
+
+<main>
+  <div class="section-title">Nossos serviços</div>
+  <div class="services-preview" id="servicesPreview"></div>
+
+  <div class="section-title">Faça seu agendamento</div>
+
+  <div id="formSection">
+    <div class="form-card">
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label>Nome completo</label>
+          <input type="text" id="clientName" placeholder="Seu nome">
+        </div>
+
+        <div class="form-group">
+          <label>WhatsApp</label>
+          <input type="tel" id="clientPhone" placeholder="(84) 99999-9999">
+        </div>
+
+        <div class="form-group full">
+          <label>Veículo / Item</label>
+          <input type="text" id="vehicle" placeholder="Ex: Civic 2020, Moto Honda, Sofá 3 lugares...">
+        </div>
+
+        <div class="form-group full">
+          <label>Serviço</label>
+          <select id="serviceSelect" onchange="onServiceChange()">
+            <option value="">— Selecione um serviço —</option>
+          </select>
+          <div id="priceTag"></div>
+        </div>
+
+        <div class="form-group full">
+          <label>Tipo de atendimento</label>
+          <div class="attendance-options">
+            <label class="attendance-option active" id="opt-shop" onclick="setAttendance('shop')">
+              <input type="radio" name="attendance" value="shop" checked>
+              <div>
+                <div class="att-icon">🔧</div>
+                <div class="att-label">Levar ao estabelecimento</div>
+                <div class="att-sub">Você traz até a gente</div>
+              </div>
+            </label>
+            <label class="attendance-option" id="opt-home" onclick="setAttendance('home')">
+              <input type="radio" name="attendance" value="home">
+              <div>
+                <div class="att-icon">🏠</div>
+                <div class="att-label">Buscar em casa</div>
+                <div class="att-sub">A gente vai até você</div>
+              </div>
+            </label>
+          </div>
+
+          <div class="coleta-fields" id="coletaFields">
+            <div class="form-grid">
+              <div class="form-group full">
+                <label>Endereço completo</label>
+                <input type="text" id="address" placeholder="Rua, número">
+              </div>
+              <div class="form-group">
+                <label>Bairro</label>
+                <input type="text" id="neighborhood" placeholder="Seu bairro">
+              </div>
+              <div class="form-group">
+                <label>Ponto de referência</label>
+                <input type="text" id="reference" placeholder="Próximo a...">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Data</label>
+          <input type="date" id="dateInput" onchange="onDateChange()" min="">
+        </div>
+
+        <div class="form-group">
+          <label>Horário</label>
+          <div class="slots-grid" id="slotsGrid">
+            <div style="color: var(--gray-400); font-size:13px; grid-column:1/-1;">Selecione um serviço e data primeiro</div>
+          </div>
+        </div>
+
+        <input type="hidden" id="selectedSlot" value="">
+
+      </div>
+
+      <button class="btn-submit" id="submitBtn" onclick="submitBooking()">Confirmar agendamento</button>
+    </div>
+  </div>
+
+  <div class="success-screen" id="successScreen">
+    <div class="success-icon">✓</div>
+    <h2>Agendado!</h2>
+    <p>Seu agendamento foi confirmado com sucesso.</p>
+    <p style="color: var(--gray-400); font-size: 14px;">Entraremos em contato pelo WhatsApp para confirmar os detalhes.</p>
+    <div class="booking-summary" id="bookingSummary"></div>
+    <button class="btn-new" onclick="newBooking()">Fazer novo agendamento</button>
+  </div>
+
+</main>
+
+<footer>© 2025 Silas Steticar — Centro Automotivo</footer>
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import {
+    getFirestore, collection, addDoc, getDocs, query, where, doc, deleteDoc
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyD5lioNhnibWYSV08-0j7Y3KdivyNWWeBE",
+    authDomain: "silas-estetica-atutomotic.firebaseapp.com",
+    projectId: "silas-estetica-atutomotic",
+    storageBucket: "silas-estetica-atutomotic.firebasestorage.app",
+    messagingSenderId: "483209941593",
+    appId: "1:483209941593:web:2f7caaefc9bdfb94a0d748"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // ─── DADOS ───────────────────────────────────────────────
+  const SERVICES = [
+    { id: 'hig-interna',    name: 'Higienização Interna',            price: 250,  priceLabel: 'R$ 250',         duration: 90,  maxPerDay: 1  },
+    { id: 'rev-farois',     name: 'Revitalização de Faróis',         price: 100,  priceLabel: 'R$ 100',         duration: 40,  maxPerDay: 2  },
+    { id: 'hig-estofados',  name: 'Higienização de Estofados',       price: null, priceLabel: 'Orçamento',      duration: 60,  maxPerDay: 4  },
+    { id: 'lav-detalhada',  name: 'Lavagem Detalhada',               price: 130,  priceLabel: 'R$ 130',         duration: 60,  maxPerDay: 1  },
+    { id: 'polimento',      name: 'Polimento',                       price: 200,  priceLabel: 'R$ 200',         duration: 60,  maxPerDay: 1  },
+    { id: 'hig-ar',         name: 'Higienização de Ar Condicionado', price: 130,  priceLabel: 'R$ 130',         duration: 60,  maxPerDay: 4  },
+    { id: 'lav-motor',      name: 'Lavagem de Motor',                price: 50,   priceLabel: 'R$ 50',          duration: 30,  maxPerDay: 3  },
+    { id: 'colchao-s',      name: 'Colchão Solteiro',                price: 100,  priceLabel: 'R$ 100',         duration: 60,  maxPerDay: 4  },
+    { id: 'colchao-c',      name: 'Colchão Casal',                   price: 150,  priceLabel: 'R$ 150',         duration: 60,  maxPerDay: 4  },
+    { id: 'tapetes',        name: 'Tapetes',                         price: 95,   priceLabel: 'R$ 70 a R$ 120', duration: 60,  maxPerDay: 4  },
+    { id: 'peliculas',      name: 'Aplicação de Películas',          price: null, priceLabel: 'Orçamento',      duration: 60,  maxPerDay: 3  },
+    { id: 'lav-hatch',      name: 'Lavagem Simples — Hatch',         price: 50,   priceLabel: 'R$ 50',          duration: 90,  maxPerDay: 4  },
+    { id: 'lav-suv',        name: 'Lavagem Simples — SUV',           price: 80,   priceLabel: 'R$ 80',          duration: 90,  maxPerDay: 4  },
+    { id: 'lav-moto',       name: 'Lavagem Simples — Moto',          price: 25,   priceLabel: 'R$ 25',          duration: 40,  maxPerDay: 5  },
+  ];
+
+  const WORKING_HOURS = {
+    1: [{start: 7*60, end: 11*60}, {start: 13*60, end: 17*60+30}],
+    2: [{start: 7*60, end: 11*60}, {start: 13*60, end: 17*60+30}],
+    3: [{start: 7*60, end: 11*60}, {start: 13*60, end: 17*60+30}],
+    4: [{start: 7*60, end: 11*60}, {start: 13*60, end: 17*60+30}],
+    5: [{start: 7*60, end: 11*60}, {start: 13*60, end: 17*60+30}],
+    6: [{start: 7*60, end: 12*60}],
+  };
+
+  // Cache de agendamentos do dia atual consultado
+  let cachedBookings = [];
+  let cachedDate = null;
+  let selectedAttendance = 'shop';
+
+  // ─── HELPERS ─────────────────────────────────────────────
+  function showLoading(msg = 'Carregando...') {
+    document.getElementById('loadingText').textContent = msg;
+    document.getElementById('loadingOverlay').classList.remove('hidden');
+  }
+  function hideLoading() {
+    document.getElementById('loadingOverlay').classList.add('hidden');
+  }
+
+  function formatDuration(min) {
+    if (min >= 60) { const h = Math.floor(min/60); const m = min % 60; return m > 0 ? `${h}h${m}min` : `${h}h`; }
+    return `${min}min`;
+  }
+  function formatTime(min) {
+    return `${String(Math.floor(min/60)).padStart(2,'0')}:${String(min%60).padStart(2,'0')}`;
+  }
+
+  // ─── INIT ─────────────────────────────────────────────────
+  // Preencher select de serviços
+  const sel = document.getElementById('serviceSelect');
+  SERVICES.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.id;
+    opt.textContent = s.name + ' — ' + s.priceLabel;
+    sel.appendChild(opt);
+  });
+
+  // Preencher cards de serviços
+  const preview = document.getElementById('servicesPreview');
+  SERVICES.forEach(s => {
+    preview.innerHTML += `
+      <div class="service-card">
+        <div class="service-name">${s.name}</div>
+        <div class="service-price">${s.priceLabel}</div>
+        <div class="service-duration">${formatDuration(s.duration)}</div>
+      </div>`;
+  });
+
+  // Data mínima = hoje
+  const today = new Date();
+  document.getElementById('dateInput').min = today.toISOString().split('T')[0];
+
+  // ─── FIREBASE: buscar agendamentos de um dia ──────────────
+  async function fetchBookingsForDate(dateStr) {
+    if (cachedDate === dateStr) return cachedBookings;
+    const q = query(collection(db, 'bookings'), where('date', '==', dateStr));
+    const snapshot = await getDocs(q);
+    cachedBookings = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+    cachedDate = dateStr;
+    return cachedBookings;
+  }
+
+  // ─── FIREBASE: verificar se dia está bloqueado ────────────
+  async function isDayBlocked(dateStr) {
+    const q = query(collection(db, 'blockedDays'), where('date', '==', dateStr));
+    const snapshot = await getDocs(q);
+    return !snapshot.empty;
+  }
+
+  // ─── UI ───────────────────────────────────────────────────
+  window.onServiceChange = function() {
+    const sid = document.getElementById('serviceSelect').value;
+    const svc = SERVICES.find(s => s.id === sid);
+    const tag = document.getElementById('priceTag');
+    if (!svc) { tag.innerHTML = ''; return; }
+    if (svc.price === null) {
+      tag.innerHTML = `<div class="orcamento-note">* O valor será informado no local após avaliação</div>`;
+    } else {
+      tag.innerHTML = `<div class="price-tag">💰 ${svc.priceLabel}</div>`;
+    }
+    document.getElementById('selectedSlot').value = '';
+    window.onDateChange();
+  };
+
+  window.onDateChange = async function() {
+    const sid = document.getElementById('serviceSelect').value;
+    const dateVal = document.getElementById('dateInput').value;
+    const grid = document.getElementById('slotsGrid');
+
+    if (!sid || !dateVal) {
+      grid.innerHTML = `<div style="color:var(--gray-400);font-size:13px;grid-column:1/-1">Selecione um serviço e data primeiro</div>`;
+      return;
+    }
+
+    const date = new Date(dateVal + 'T12:00:00');
+    const dow = date.getDay();
+
+    if (!WORKING_HOURS[dow]) {
+      grid.innerHTML = `<div style="color:var(--gray-400);font-size:13px;grid-column:1/-1">Não atendemos nesse dia 😔</div>`;
+      return;
+    }
+
+    grid.innerHTML = `<div style="color:var(--gray-400);font-size:13px;grid-column:1/-1">⏳ Verificando disponibilidade...</div>`;
+
+    try {
+      const blocked = await isDayBlocked(dateVal);
+      if (blocked) {
+        grid.innerHTML = `<div style="color:var(--gray-400);font-size:13px;grid-column:1/-1">🔒 Este dia está bloqueado para agendamentos</div>`;
+        return;
+      }
+
+      const bookings = await fetchBookingsForDate(dateVal);
+      const svc = SERVICES.find(s => s.id === sid);
+      const slots = generateSlots(dateVal, svc, dow, bookings);
+
+      if (!slots.length) {
+        grid.innerHTML = `<div style="color:var(--gray-400);font-size:13px;grid-column:1/-1">Nenhum horário disponível para este dia</div>`;
+        return;
+      }
+
+      grid.innerHTML = '';
+      slots.forEach(slot => {
+        const btn = document.createElement('button');
+        btn.className = 'slot-btn' + (slot.occupied ? ' occupied' : '');
+        btn.textContent = formatTime(slot.start);
+        if (!slot.occupied) {
+          btn.onclick = () => selectSlot(slot.start, btn);
+        }
+        grid.appendChild(btn);
+      });
+    } catch (err) {
+      console.error(err);
+      grid.innerHTML = `<div style="color:var(--red-light);font-size:13px;grid-column:1/-1">Erro ao carregar horários. Tente novamente.</div>`;
+    }
+  };
+
+  function generateSlots(dateVal, svc, dow, bookings) {
+    const periods = WORKING_HOURS[dow];
+    const slots = [];
+    const step = Math.min(svc.duration, 30);
+
+    const dayBookings = bookings.filter(b => b.date === dateVal);
+    const svcCount = dayBookings.filter(b => b.serviceId === svc.id).length;
+    if (svcCount >= svc.maxPerDay) return slots;
+
+    periods.forEach(period => {
+      let t = period.start;
+      while (t + svc.duration <= period.end) {
+        const end = t + svc.duration;
+        const overlapping = dayBookings.filter(b => !(b.endMinutes <= t || b.startMinutes >= end));
+        const occupied = overlapping.length >= 2;
+        slots.push({ start: t, end, occupied });
+        t += step;
+      }
+    });
+
+    return slots;
+  }
+
+  function selectSlot(startMin, btn) {
+    document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    document.getElementById('selectedSlot').value = startMin;
+  }
+
+  window.setAttendance = function(type) {
+    selectedAttendance = type;
+    document.getElementById('opt-shop').classList.toggle('active', type === 'shop');
+    document.getElementById('opt-home').classList.toggle('active', type === 'home');
+    document.getElementById('coletaFields').classList.toggle('visible', type === 'home');
+  };
+
+  // ─── SUBMIT ───────────────────────────────────────────────
+  window.submitBooking = async function() {
+    const name = document.getElementById('clientName').value.trim();
+    const phone = document.getElementById('clientPhone').value.trim();
+    const vehicle = document.getElementById('vehicle').value.trim();
+    const sid = document.getElementById('serviceSelect').value;
+    const dateVal = document.getElementById('dateInput').value;
+    const slot = document.getElementById('selectedSlot').value;
+
+    if (!name || !phone || !vehicle || !sid || !dateVal || !slot) {
+      alert('Por favor, preencha todos os campos e selecione um horário.');
+      return;
+    }
+
+    const svc = SERVICES.find(s => s.id === sid);
+    const startMin = parseInt(slot);
+    const endMin = startMin + svc.duration;
+
+    const booking = {
+      clientName: name,
+      phone,
+      vehicle,
+      serviceId: svc.id,
+      serviceName: svc.name,
+      priceLabel: svc.priceLabel,
+      date: dateVal,
+      startMinutes: startMin,
+      endMinutes: endMin,
+      attendance: selectedAttendance,
+      address: selectedAttendance === 'home' ? document.getElementById('address').value : '',
+      neighborhood: selectedAttendance === 'home' ? document.getElementById('neighborhood').value : '',
+      reference: selectedAttendance === 'home' ? document.getElementById('reference').value : '',
+      createdAt: new Date().toISOString(),
+    };
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    showLoading('Salvando agendamento...');
+
+    try {
+      const docRef = await addDoc(collection(db, 'bookings'), booking);
+      booking.id = docRef.id;
+
+      // Invalidar cache
+      cachedDate = null;
+      cachedBookings = [];
+
+      hideLoading();
+      showSuccess(booking);
+    } catch (err) {
+      hideLoading();
+      btn.disabled = false;
+      console.error(err);
+      alert('Erro ao salvar agendamento. Verifique sua conexão e tente novamente.');
+    }
+  };
+
+  // ─── WHATSAPP ─────────────────────────────────────────────
+  const SILAS_WHATSAPP = '5584986592768';
+
+  function sendWhatsAppNotification(b) {
+    const dateFormatted = new Date(b.date + 'T12:00:00').toLocaleDateString('pt-BR');
+    let msg = '';
+    if (b.attendance === 'home') {
+      msg =
+        `🏠 *NOVO AGENDAMENTO — COLETA EM CASA*\n\n` +
+        `👤 *Cliente:* ${b.clientName}\n📱 *WhatsApp:* ${b.phone}\n🚗 *Veículo/Item:* ${b.vehicle}\n` +
+        `🔧 *Serviço:* ${b.serviceName}\n💰 *Valor:* ${b.priceLabel}\n` +
+        `📅 *Data:* ${dateFormatted}\n🕐 *Horário:* ${formatTime(b.startMinutes)}\n\n` +
+        `📍 *Endereço para coleta:*\n${b.address || '—'}\nBairro: ${b.neighborhood || '—'}\nReferência: ${b.reference || '—'}`;
+    } else {
+      msg =
+        `🔧 *NOVO AGENDAMENTO — NO ESTABELECIMENTO*\n\n` +
+        `👤 *Cliente:* ${b.clientName}\n📱 *WhatsApp:* ${b.phone}\n🚗 *Veículo/Item:* ${b.vehicle}\n` +
+        `🔧 *Serviço:* ${b.serviceName}\n💰 *Valor:* ${b.priceLabel}\n` +
+        `📅 *Data:* ${dateFormatted}\n🕐 *Horário:* ${formatTime(b.startMinutes)}`;
+    }
+    window.open(`https://wa.me/${SILAS_WHATSAPP}?text=${encodeURIComponent(msg)}`, '_blank');
+  }
+
+  // ─── SUCCESS ──────────────────────────────────────────────
+  function showSuccess(b) {
+    document.getElementById('formSection').style.display = 'none';
+    const s = document.getElementById('successScreen');
+    s.classList.add('visible');
+
+    const dateFormatted = new Date(b.date + 'T12:00:00').toLocaleDateString('pt-BR');
+
+    let rows = `
+      <div class="summary-row"><span class="summary-label">Nome</span><span class="summary-value">${b.clientName}</span></div>
+      <div class="summary-row"><span class="summary-label">Serviço</span><span class="summary-value">${b.serviceName}</span></div>
+      <div class="summary-row"><span class="summary-label">Valor</span><span class="summary-value red">${b.priceLabel}</span></div>
+      <div class="summary-row"><span class="summary-label">Data</span><span class="summary-value">${dateFormatted}</span></div>
+      <div class="summary-row"><span class="summary-label">Horário</span><span class="summary-value">${formatTime(b.startMinutes)}</span></div>
+      <div class="summary-row"><span class="summary-label">Atendimento</span><span class="summary-value">${b.attendance === 'home' ? '🏠 Coleta em casa' : '🔧 No estabelecimento'}</span></div>
+    `;
+    if (b.attendance === 'home' && b.address) {
+      rows += `<div class="summary-row"><span class="summary-label">Endereço</span><span class="summary-value">${b.address}, ${b.neighborhood}</span></div>`;
+    }
+    document.getElementById('bookingSummary').innerHTML = rows;
+
+    setTimeout(() => sendWhatsAppNotification(b), 800);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  window.newBooking = function() {
+    document.getElementById('formSection').style.display = '';
+    document.getElementById('successScreen').classList.remove('visible');
+    document.getElementById('submitBtn').disabled = false;
+    document.getElementById('clientName').value = '';
+    document.getElementById('clientPhone').value = '';
+    document.getElementById('vehicle').value = '';
+    document.getElementById('serviceSelect').value = '';
+    document.getElementById('dateInput').value = '';
+    document.getElementById('selectedSlot').value = '';
+    document.getElementById('priceTag').innerHTML = '';
+    document.getElementById('slotsGrid').innerHTML = `<div style="color:var(--gray-400);font-size:13px;grid-column:1/-1">Selecione um serviço e data primeiro</div>`;
+    setAttendance('shop');
+  };
+</script>
+
+</body>
+</html>

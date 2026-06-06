@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Silas Steticar</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #c0392b; --red-dark: #96281b; --red-light: #e74c3c;
+    --black: #0a0a0a; --gray-900: #111111; --gray-800: #1a1a1a;
+    --gray-700: #242424; --gray-600: #333333; --gray-400: #666666;
+    --gray-200: #aaaaaa; --white: #ffffff; --border: rgba(255,255,255,0.07);
+    --green: #27ae60;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--black); color: var(--white); font-family: 'Barlow', sans-serif; min-height: 100vh; }
+
+  /* LOGIN */
+  .login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .login-card { background: var(--gray-800); border: 1px solid var(--border); border-radius: 16px; padding: 48px 40px; width: 100%; max-width: 400px; text-align: center; }
+  .login-logo { width: 64px; height: 64px; background: var(--red); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-family: 'Bebas Neue', cursive; font-size: 28px; color: white; margin: 0 auto 24px; }
+  .login-card h2 { font-family: 'Bebas Neue', cursive; font-size: 28px; letter-spacing: 3px; margin-bottom: 6px; }
+  .login-card p { color: var(--gray-400); font-size: 13px; margin-bottom: 32px; }
+  .login-input { background: var(--gray-700); border: 1px solid var(--border); border-radius: 8px; color: var(--white); font-family: 'Barlow', sans-serif; font-size: 15px; padding: 14px 16px; outline: none; width: 100%; margin-bottom: 16px; text-align: center; letter-spacing: 4px; transition: border-color 0.2s; }
+  .login-input:focus { border-color: var(--red); }
+  .login-btn { width: 100%; background: var(--red); border: none; border-radius: 8px; color: white; font-family: 'Bebas Neue', cursive; font-size: 18px; letter-spacing: 3px; padding: 16px; cursor: pointer; transition: background 0.2s; }
+  .login-btn:hover { background: var(--red-light); }
+  .login-error { color: var(--red-light); font-size: 13px; margin-top: 12px; display: none; }
+
+  /* ADMIN LAYOUT */
+  .admin-layout { display: none; }
+  .admin-layout.visible { display: block; }
+
+  /* HEADER */
+  header { background: var(--gray-900); border-bottom: 1px solid var(--border); padding: 0 24px; position: sticky; top: 0; z-index: 100; }
+  .header-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .logo-area { display: flex; align-items: center; gap: 12px; }
+  .logo-img-admin { height: 40px; width: auto; display: block; }
+  .header-right { display: flex; align-items: center; gap: 16px; }
+  .admin-badge { background: rgba(192,57,43,0.15); border: 1px solid rgba(192,57,43,0.3); border-radius: 4px; color: var(--red-light); font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; padding: 4px 10px; }
+  .logout-btn { background: none; border: 1px solid var(--border); border-radius: 6px; color: var(--gray-400); font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; padding: 6px 12px; cursor: pointer; transition: all 0.2s; }
+  .logout-btn:hover { color: white; border-color: var(--gray-400); }
+
+  /* MAIN */
+  main { max-width: 1200px; margin: 0 auto; padding: 32px 24px 80px; }
+
+  /* DATE NAV */
+  .date-nav { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; flex-wrap: wrap; }
+  .date-nav-btn { background: var(--gray-800); border: 1px solid var(--border); border-radius: 8px; color: var(--white); font-family: 'Barlow Condensed', sans-serif; font-size: 18px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
+  .date-nav-btn:hover { border-color: var(--red); color: var(--red-light); }
+  .date-display { font-family: 'Bebas Neue', cursive; font-size: 28px; letter-spacing: 2px; flex: 1; }
+  .date-input-admin { background: var(--gray-800); border: 1px solid var(--border); border-radius: 8px; color: var(--white); font-family: 'Barlow', sans-serif; font-size: 14px; padding: 8px 12px; outline: none; }
+  .date-input-admin:focus { border-color: var(--red); }
+
+  /* STATS */
+  .stats-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-bottom: 28px; }
+  .stat-card { background: var(--gray-800); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+  .stat-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--gray-400); margin-bottom: 6px; }
+  .stat-value { font-family: 'Bebas Neue', cursive; font-size: 32px; letter-spacing: 1px; color: var(--white); line-height: 1; }
+  .stat-value.red { color: var(--red-light); }
+  .stat-value.green { color: #2ecc71; }
+
+  /* SECTION TITLE */
+  .section-title { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 4px; text-transform: uppercase; color: var(--red); margin-bottom: 16px; display: flex; align-items: center; gap: 12px; }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* TABLE */
+  .bookings-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 32px; }
+  table { width: 100%; border-collapse: collapse; background: var(--gray-800); }
+  thead tr { border-bottom: 1px solid var(--border); }
+  th { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--gray-400); padding: 14px 16px; text-align: left; font-weight: 400; white-space: nowrap; }
+  td { padding: 14px 16px; font-size: 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  .badge { display: inline-block; border-radius: 4px; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; padding: 3px 8px; }
+  .badge-home { background: rgba(52,152,219,0.15); color: #5dade2; border: 1px solid rgba(52,152,219,0.2); }
+  .badge-shop { background: rgba(39,174,96,0.15); color: #2ecc71; border: 1px solid rgba(39,174,96,0.2); }
+  .price-cell { color: var(--red-light); font-weight: 600; }
+  .delete-btn { background: none; border: 1px solid rgba(192,57,43,0.3); border-radius: 6px; color: var(--red-light); font-size: 13px; padding: 5px 10px; cursor: pointer; transition: all 0.2s; font-family: 'Barlow Condensed', sans-serif; letter-spacing: 1px; text-transform: uppercase; }
+  .delete-btn:hover { background: rgba(192,57,43,0.1); border-color: var(--red); }
+  .empty-state { text-align: center; padding: 48px; color: var(--gray-400); font-size: 15px; }
+
+  /* BLOCK DAY */
+  .block-section { background: var(--gray-800); border: 1px solid var(--border); border-radius: 12px; padding: 24px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .block-section input[type="date"], .block-section input[type="text"] { background: var(--gray-700); border: 1px solid var(--border); border-radius: 8px; color: var(--white); font-family: 'Barlow', sans-serif; font-size: 14px; padding: 10px 14px; outline: none; flex: 1; min-width: 140px; }
+  .block-section input:focus { border-color: var(--red); }
+  .block-btn { background: var(--red); border: none; border-radius: 8px; color: white; font-family: 'Barlow Condensed', sans-serif; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; padding: 12px 20px; cursor: pointer; transition: background 0.2s; white-space: nowrap; }
+  .block-btn:hover { background: var(--red-light); }
+  .blocked-list { margin-top: 16px; }
+  .blocked-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .blocked-item:last-child { border-bottom: none; }
+  .blocked-date { color: var(--white); font-weight: 600; }
+  .blocked-reason { color: var(--gray-400); font-size: 13px; }
+
+  /* Loading inline */
+  .inline-loading { color: var(--gray-400); font-family: 'Barlow Condensed', sans-serif; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; padding: 32px; text-align: center; }
+
+  @media (max-width: 600px) {
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    .block-section { flex-direction: column; }
+    .block-section input, .block-btn { width: 100%; }
+    th, td { padding: 10px 12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <img src="logo-silas.png" alt="Silas Steticar" style="height:90px;width:auto;margin:0 auto 24px;display:block;">
+    <h2>Área Admin</h2>
+    <p>Silas Steticar — Centro Automotivo</p>
+    <input type="password" class="login-input" id="passwordInput" placeholder="••••••••" onkeydown="if(event.key==='Enter') doLogin()">
+    <button class="login-btn" onclick="doLogin()">Entrar</button>
+    <div class="login-error" id="loginError">Senha incorreta. Tente novamente.</div>
+    <!-- Status Firebase -->
+    <div id="fbStatus" style="margin-top:20px;padding:10px 14px;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;background:var(--gray-700);border:1px solid var(--border);color:var(--gray-400);">
+      🔄 Verificando conexão com Firebase...
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div class="admin-layout" id="adminLayout">
+  <header>
+    <div class="header-inner">
+      <div class="logo-area">
+        <img src="logo-silas.png" alt="Silas Steticar" class="logo-img-admin">
+      </div>
+      <div class="header-right">
+        <span class="admin-badge">Admin</span>
+        <button class="logout-btn" onclick="doLogout()">Sair</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="date-nav">      <button class="date-nav-btn" onclick="changeDay(-1)">‹</button>
+      <div class="date-display" id="dateDisplay"></div>
+      <button class="date-nav-btn" onclick="changeDay(1)">›</button>
+      <input type="date" class="date-input-admin" id="adminDateInput" onchange="onAdminDateChange()">
+      <button class="date-nav-btn" onclick="goToday()" style="font-size:13px;font-family:'Barlow Condensed';letter-spacing:1px;width:auto;padding:0 12px;">Hoje</button>
+    </div>
+
+    <div class="stats-row" id="statsRow"></div>
+
+    <div class="section-title">Agendamentos do dia</div>
+    <div class="bookings-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Horário</th><th>Cliente</th><th>WhatsApp</th>
+            <th>Veículo / Item</th><th>Serviço</th><th>Valor</th>
+            <th>Atendimento</th><th>Endereço</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="bookingsBody"><tr><td colspan="9"><div class="inline-loading">Carregando...</div></td></tr></tbody>
+      </table>
+    </div>
+
+    <div class="section-title">Bloquear dias</div>
+    <div class="block-section">
+      <input type="date" id="blockDate">
+      <input type="text" id="blockReason" placeholder="Motivo (ex: feriado, folga...)">
+      <button class="block-btn" onclick="blockDay()">Bloquear dia</button>
+    </div>
+    <div class="blocked-list" id="blockedList"></div>
+  </main>
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import {
+    getFirestore, collection, addDoc, getDocs, query, where,
+    doc, deleteDoc, orderBy
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyD5lioNhnibWYSV08-0j7Y3KdivyNWWeBE",
+    authDomain: "silas-estetica-atutomotic.firebaseapp.com",
+    projectId: "silas-estetica-atutomotic",
+    storageBucket: "silas-estetica-atutomotic.firebasestorage.app",
+    messagingSenderId: "483209941593",
+    appId: "1:483209941593:web:2f7caaefc9bdfb94a0d748"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // ─── TESTE DE CONEXÃO (roda ao abrir a página) ────────────
+  (async () => {
+    const el = document.getElementById('fbStatus');
+    try {
+      // Tenta ler a coleção bookings (mesmo vazia, confirma conexão)
+      await getDocs(collection(db, 'bookings'));
+      el.style.background = 'rgba(39,174,96,0.12)';
+      el.style.borderColor = 'rgba(39,174,96,0.3)';
+      el.style.color = '#2ecc71';
+      el.textContent = '✅ Firebase conectado com sucesso!';
+    } catch (err) {
+      el.style.background = 'rgba(192,57,43,0.12)';
+      el.style.borderColor = 'rgba(192,57,43,0.3)';
+      el.style.color = '#e74c3c';
+      el.textContent = '❌ Erro: ' + (err.code || err.message);
+      console.error('Firebase error:', err);
+    }
+  })();
+
+  const ADMIN_PASSWORD = 'silas2025';
+
+  const SERVICES = {
+    'hig-interna':   { name: 'Higienização Interna',            priceLabel: 'R$ 250',         duration: 90,  maxPerDay: 1 },
+    'rev-farois':    { name: 'Revitalização de Faróis',         priceLabel: 'R$ 100',         duration: 40,  maxPerDay: 2 },
+    'hig-estofados': { name: 'Higienização de Estofados',       priceLabel: 'Orçamento',      duration: 60,  maxPerDay: 4 },
+    'lav-detalhada': { name: 'Lavagem Detalhada',               priceLabel: 'R$ 130',         duration: 60,  maxPerDay: 1 },
+    'polimento':     { name: 'Polimento',                       priceLabel: 'R$ 200',         duration: 60,  maxPerDay: 1 },
+    'hig-ar':        { name: 'Higienização de Ar Condicionado', priceLabel: 'R$ 130',         duration: 60,  maxPerDay: 4 },
+    'lav-motor':     { name: 'Lavagem de Motor',                priceLabel: 'R$ 50',          duration: 30,  maxPerDay: 3 },
+    'colchao-s':     { name: 'Colchão Solteiro',                priceLabel: 'R$ 100',         duration: 60,  maxPerDay: 4 },
+    'colchao-c':     { name: 'Colchão Casal',                   priceLabel: 'R$ 150',         duration: 60,  maxPerDay: 4 },
+    'tapetes':       { name: 'Tapetes',                         priceLabel: 'R$ 70 a R$ 120', duration: 60,  maxPerDay: 4 },
+    'peliculas':     { name: 'Aplicação de Películas',          priceLabel: 'Orçamento',      duration: 60,  maxPerDay: 3 },
+    'lav-hatch':     { name: 'Lavagem Simples — Hatch',         priceLabel: 'R$ 50',          duration: 90,  maxPerDay: 4 },
+    'lav-suv':       { name: 'Lavagem Simples — SUV',           priceLabel: 'R$ 80',          duration: 90,  maxPerDay: 4 },
+    'lav-moto':      { name: 'Lavagem Simples — Moto',          priceLabel: 'R$ 25',          duration: 40,  maxPerDay: 5 },
+  };
+
+  let currentDate = new Date();
+
+  // ─── HELPERS ─────────────────────────────────────────────
+  function getDateStr(d) {
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+  function formatTime(min) {
+    return `${String(Math.floor(min/60)).padStart(2,'0')}:${String(min%60).padStart(2,'0')}`;
+  }
+
+  // ─── LOGIN ────────────────────────────────────────────────
+  window.doLogin = function() {
+    const pw = document.getElementById('passwordInput').value;
+    if (pw === ADMIN_PASSWORD) {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('adminLayout').classList.add('visible');
+      initAdmin();
+    } else {
+      document.getElementById('loginError').style.display = 'block';
+    }
+  };
+
+  window.doLogout = function() {
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('adminLayout').classList.remove('visible');
+    document.getElementById('passwordInput').value = '';
+    document.getElementById('loginError').style.display = 'none';
+  };
+
+  function initAdmin() {
+    updateAdminDateInput();
+    renderAll();
+    renderBlocked();
+  }
+
+  // ─── DATE NAV ─────────────────────────────────────────────
+  function updateAdminDateInput() {
+    document.getElementById('adminDateInput').value = getDateStr(currentDate);
+    const opts = { weekday:'long', day:'numeric', month:'long', year:'numeric' };
+    const label = currentDate.toLocaleDateString('pt-BR', opts);
+    document.getElementById('dateDisplay').textContent = label.charAt(0).toUpperCase() + label.slice(1);
+  }
+
+  window.changeDay = function(delta) {
+    currentDate.setDate(currentDate.getDate() + delta);
+    updateAdminDateInput();
+    renderAll();
+  };
+
+  window.goToday = function() {
+    currentDate = new Date();
+    updateAdminDateInput();
+    renderAll();
+  };
+
+  window.onAdminDateChange = function() {
+    const val = document.getElementById('adminDateInput').value;
+    if (val) {
+      currentDate = new Date(val + 'T12:00:00');
+      updateAdminDateInput();
+      renderAll();
+    }
+  };
+
+  // ─── RENDER ALL (busca do Firestore) ──────────────────────
+  async function renderAll() {
+    const dateStr = getDateStr(currentDate);
+
+    // Loading state
+    document.getElementById('bookingsBody').innerHTML = `<tr><td colspan="9"><div class="inline-loading">⏳ Carregando agendamentos...</div></td></tr>`;
+    document.getElementById('statsRow').innerHTML = '';
+
+    try {
+      // Buscar agendamentos do dia
+      const q = query(collection(db, 'bookings'), where('date', '==', dateStr));
+      const snapshot = await getDocs(q);
+      const dayBookings = snapshot.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .sort((a, b) => a.startMinutes - b.startMinutes);
+
+      // Verificar se dia está bloqueado
+      const blockedQ = query(collection(db, 'blockedDays'), where('date', '==', dateStr));
+      const blockedSnap = await getDocs(blockedQ);
+      const blocked = !blockedSnap.empty ? blockedSnap.docs[0] : null;
+
+      // Stats
+      const totalRevenue = dayBookings.reduce((acc, b) => {
+        const svc = SERVICES[b.serviceId];
+        const match = svc?.priceLabel?.match(/R\$ (\d+)/);
+        return acc + (match ? parseInt(match[1]) : 0);
+      }, 0);
+      const workerLoad = Math.min(dayBookings.length, 2);
+
+      document.getElementById('statsRow').innerHTML = `
+        <div class="stat-card">
+          <div class="stat-label">Agendamentos</div>
+          <div class="stat-value ${dayBookings.length > 0 ? 'red' : ''}">${dayBookings.length}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Vagas livres</div>
+          <div class="stat-value green">${Math.max(0, 2 - workerLoad)}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Faturamento estimado</div>
+          <div class="stat-value red">R$${totalRevenue}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Status do dia</div>
+          <div class="stat-value" style="font-size:16px;margin-top:4px;font-family:'Barlow Condensed';letter-spacing:1px">
+            ${blocked ? '🔒 Bloqueado' : dayBookings.length === 0 ? '✅ Livre' : '📅 Com agenda'}
+          </div>
+        </div>
+      `;
+
+      // Tabela
+      const tbody = document.getElementById('bookingsBody');
+      if (dayBookings.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">Nenhum agendamento para este dia.</div></td></tr>`;
+      } else {
+        tbody.innerHTML = dayBookings.map(b => {
+          const addressCell = b.attendance === 'home'
+            ? `${b.address || '—'}<br><small style="color:var(--gray-400)">${b.neighborhood || ''} ${b.reference ? '· ' + b.reference : ''}</small>`
+            : '—';
+          return `
+            <tr>
+              <td><strong>${formatTime(b.startMinutes)}</strong> – ${formatTime(b.endMinutes)}</td>
+              <td>${b.clientName}</td>
+              <td><a href="https://wa.me/55${b.phone.replace(/\D/g,'')}" target="_blank" style="color:var(--red-light);text-decoration:none">${b.phone}</a></td>
+              <td>${b.vehicle}</td>
+              <td>${b.serviceName}</td>
+              <td class="price-cell">${b.priceLabel}</td>
+              <td><span class="badge ${b.attendance === 'home' ? 'badge-home' : 'badge-shop'}">${b.attendance === 'home' ? '🏠 Coleta' : '🔧 Loja'}</span></td>
+              <td>${addressCell}</td>
+              <td><button class="delete-btn" onclick="deleteBooking('${b.id}')">Cancelar</button></td>
+            </tr>`;
+        }).join('');
+      }
+    } catch (err) {
+      console.error(err);
+      document.getElementById('bookingsBody').innerHTML = `<tr><td colspan="9"><div class="empty-state" style="color:var(--red-light)">Erro ao carregar dados. Verifique a conexão.</div></td></tr>`;
+    }
+  }
+
+  // ─── CANCELAR AGENDAMENTO ─────────────────────────────────
+  window.deleteBooking = async function(id) {
+    if (!confirm('Cancelar este agendamento?')) return;
+    try {
+      await deleteDoc(doc(db, 'bookings', id));
+      renderAll();
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao cancelar agendamento.');
+    }
+  };
+
+  // ─── BLOQUEAR DIA ─────────────────────────────────────────
+  window.blockDay = async function() {
+    const date = document.getElementById('blockDate').value;
+    const reason = document.getElementById('blockReason').value.trim() || 'Sem motivo informado';
+    if (!date) { alert('Selecione uma data para bloquear.'); return; }
+
+    // Checar se já está bloqueado
+    const q = query(collection(db, 'blockedDays'), where('date', '==', date));
+    const snap = await getDocs(q);
+    if (!snap.empty) { alert('Este dia já está bloqueado.'); return; }
+
+    try {
+      await addDoc(collection(db, 'blockedDays'), { date, reason, createdAt: new Date().toISOString() });
+      document.getElementById('blockDate').value = '';
+      document.getElementById('blockReason').value = '';
+      renderBlocked();
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao bloquear dia.');
+    }
+  };
+
+  // ─── DESBLOQUEAR DIA ──────────────────────────────────────
+  window.unblockDay = async function(id) {
+    try {
+      await deleteDoc(doc(db, 'blockedDays', id));
+      renderBlocked();
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao desbloquear dia.');
+    }
+  };
+
+  // ─── LISTAR DIAS BLOQUEADOS ───────────────────────────────
+  async function renderBlocked() {
+    const list = document.getElementById('blockedList');
+    list.innerHTML = `<div class="inline-loading" style="padding:16px">Carregando dias bloqueados...</div>`;
+    try {
+      const snap = await getDocs(collection(db, 'blockedDays'));
+      const days = snap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .sort((a, b) => a.date.localeCompare(b.date));
+
+      if (!days.length) { list.innerHTML = ''; return; }
+
+      list.innerHTML = days.map(b => {
+        const d = new Date(b.date + 'T12:00:00');
+        const label = d.toLocaleDateString('pt-BR', { weekday:'short', day:'numeric', month:'short' });
+        return `
+          <div class="blocked-item">
+            <div>
+              <span class="blocked-date">${label}</span>
+              <span class="blocked-reason"> — ${b.reason}</span>
+            </div>
+            <button class="delete-btn" onclick="unblockDay('${b.id}')">Desbloquear</button>
+          </div>`;
+      }).join('');
+    } catch (err) {
+      console.error(err);
+      list.innerHTML = '';
+    }
+  }
+</script>
+
+</body>
+</html>

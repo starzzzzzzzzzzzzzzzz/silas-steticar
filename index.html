@@ -611,11 +611,14 @@
     btn.disabled = true;
     showLoading('Salvando agendamento...');
 
+    // Abre o WhatsApp ANTES do await — navegador só permite window.open
+    // em resposta direta ao clique do usuário, sem async no meio
+    const waWindow = sendWhatsAppNotification(booking);
+
     try {
       const docRef = await addDoc(collection(db, 'bookings'), booking);
       booking.id = docRef.id;
 
-      // Invalidar cache
       cachedDate = null;
       cachedBookings = [];
 
@@ -672,8 +675,6 @@
       rows += `<div class="summary-row"><span class="summary-label">Endereço</span><span class="summary-value">${b.address}, ${b.neighborhood}</span></div>`;
     }
     document.getElementById('bookingSummary').innerHTML = rows;
-
-    setTimeout(() => sendWhatsAppNotification(b), 800);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
